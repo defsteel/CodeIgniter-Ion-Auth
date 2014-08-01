@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Auth extends CI_Controller {
+class Auth extends MX_Controller {
 
 	function __construct()
 	{
@@ -33,7 +33,7 @@ class Auth extends CI_Controller {
 		elseif (!$this->ion_auth->is_admin()) //remove this elseif if you want to enable this for non-admins
 		{
 			//redirect them to the home page because they must be an administrator to view this
-			return show_error('You must be an administrator to view this page.');
+            redirect('manage', 'refresh');
 		}
 		else
 		{
@@ -66,12 +66,26 @@ class Auth extends CI_Controller {
 			//check for "remember me"
 			$remember = (bool) $this->input->post('remember');
 
-			if ($this->ion_auth->login($this->input->post('identity'), $this->input->post('password'), $remember))
+			if ($this->ion_auth->login($this->input->post('identity'), $this->input->post('password'), $remember, $this->input->post('user_time_zone')))
 			{
-				//if the login is successful
-				//redirect them back to the home page
-				$this->session->set_flashdata('message', $this->ion_auth->messages());
-				redirect('/', 'refresh');
+				if($this->ion_auth->is_admin()){
+                    redirect('/auth', 'refresh');
+                    
+                }else{
+                //if the login is successful
+                log_message('debug', 'LOGIN SUCCESSFUL');
+                //format posted timezone for inclusion in session
+                $tz = array('user_time_zone' => $this->input->post('user_time_zone'));
+                //add timezome to session
+                $this->session->set_userdata($tz);
+                //log timezone
+                log_message('debug', 'POSTED TIMEZONE: '.log_array($this->input->post('user_time_zone')));
+                
+                $this->session->set_flashdata('message', $this->ion_auth->messages());
+                //redirect them back to the home page
+                log_message('debug', 'REDIRECTING TO ROSTER');
+                        redirect('/manage', 'refresh');
+                        }
 			}
 			else
 			{

@@ -19,7 +19,7 @@
 *
 */
 
-class Ion_auth
+class Ion_auth extends CI_Controller
 {
 	/**
 	 * account status ('not_activated', etc ...)
@@ -57,6 +57,7 @@ class Ion_auth
 	 **/
 	public function __construct()
 	{
+	    
 		$this->load->config('ion_auth', TRUE);
 		$this->load->library('email');
 		$this->lang->load('ion_auth');
